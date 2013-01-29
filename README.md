@@ -16,54 +16,98 @@ The config files are bundled with the build pack itself:
 Pre-compiling binaries
 ----------------------
 
-    # apache
-    mkdir /app
-    wget http://www.carfab.com/apachesoftware/httpd/httpd-2.4.3.tar.gz
-    tar xvzf httpd-2.4.3.tar.gz
-    cd httpd-2.4.3
-    ./configure --prefix=/app/apache --enable-rewrite
-    make
-    make install
-    cd ..
-    
-    # php
-    wget http://us2.php.net/get/php-5.4.11.tar.gz/from/us.php.net/mirror 
-    mv mirror php.tar.gz
-    tar xzvf php.tar.gz
-    cd php-5.4.11/
-    ./configure --prefix=/app/php --with-apxs2=/app/apache/bin/apxs --with-mysql --with-pdo-mysql --with-pgsql --with-pdo-pgsql --with-iconv --with-gd --with-curl=/usr/lib --with-config-file-path=/app/php --enable-soap=shared --with-libxml --with-simplexml --with-session --with-xmlrpc --with-openssl --enable-mbstring --with-bz2 --with-zlib
-    make
-    make install
-    cd ..
-    
-    # php extensions
-    mkdir /app/php/ext
-    cp /usr/lib/libmysqlclient.so.15 /app/php/ext/
-    apt-get install php5-mcrypt
-    cp /usr/lib/php5/20090626/mcrypt.so /app/php/ext/
-    
-    # pear
-    apt-get install php5-dev php-pear
-    pear config-set php_dir /app/php
-    pecl install apc
-    mkdir /app/php/include/php/ext/apc
-    cp /usr/lib/php5/20060613/apc.so /app/php/ext/
-    cp /usr/include/php5/ext/apc/apc_serializer.h /app/php/include/php/ext/apc/
-    
-    # utilities
-    apt-get install zip unzip
-    
-    # package
-    cd /app
-    echo '2.4.3' > apache/VERSION
-    tar -zcvf apache.tar.gz apache
-    echo '5.4.11' > php/VERSION
-    tar -zcvf php.tar.gz php
+# Required software
+#  - Ubuntu 10.04
+#  - curl
+#  - ANSI-C compiler
 
-    # create mahara data folder
-    cd /app
-    mkdir maharadata
-    chmod 777 maharadata
+# This script will set up a heroku cedar platform (Ubuntu 10.04) for Mahara
+#  1. Compile apache 2.4.3 and install on /app/apache
+#  2. Compile php 5.4.11 + required extensions and install on /app/php
+
+apt-get install curl
+mkdir -p /app
+
+# Prepare the filesystem
+
+mkdir -p /tmp/build
+cd /tmp/build
+
+# Compiling Apache
+curl -L http://www.carfab.com/apachesoftware/httpd/httpd-2.4.3.tar.gz | tar xzf -
+cd httpd-2.4.3
+cd srclib
+curl http://www.us.apache.org/dist//apr/apr-1.4.6.tar.gz | tar xzf -
+mv apr-1.4.6 apr
+curl http://www.us.apache.org/dist//apr/apr-util-1.5.1.tar.gz | tar xzf -
+mv apr-util-1.5.1 apr-util
+cd ..
+apt-get install libpcre3
+apt-get install libpcre3-dev
+./configure --prefix=/app/apache --with-included-apr --enable-rewrite
+make && make install
+cd ..
+
+# Apache libraries
+mkdir -p /app/php/ext
+cp /app/apache/lib/libapr-1.so.0 /app/php/ext
+cp /app/apache/lib/libaprutil-1.so /app/php/ext
+cd /app/php/ext
+ln -s libapr-1.so.0 libapr-1.so
+ln -s libaprutil-1.so.0 libaprutil-1.so
+cd /tmp/build
+
+# Compiling PHP
+apt-get install libxml2
+apt-get install libxml2-dev
+apt-get install libssl-dev
+apt-get install libvpx-dev
+apt-get install libjpeg-dev
+apt-get install libpng-dev
+apt-get install libXpm-dev
+apt-get install libbz2-dev
+apt-get install libmcrypt-dev
+apt-get install libcurl4-openssl-dev
+apt-get install postgresql-server-dev-8.4
+
+curl -L http://php.net/get/php-5.4.9.tar.gz/from/us1.php.net/mirror | tar xzf -
+cd php-5.4.9
+./configure --prefix=/app/php --with-apxs2=/app/apache/bin/apxs --with-mysql --with-pdo-mysql --with-pgsql --with-pdo-pgsql --with-iconv --with-gd --with-curl=/usr/lib --with-config-file-path=/app/php --enable-soap=shared --enable-libxml --enable-simplexml --enable-session --with-xmlrpc --with-openssl --enable-mbstring --with-bz2 --with-zlib
+make && make install
+cd ..
+
+# PHP Extensions
+apt-get install libmysqlclient-dev
+cd /app/php/ext
+cp /usr/lib/libmysqlclient.so.16.0.0 .
+ln libmysqlclient.so.16.0.0 libmysqlclient.so.16
+ln libmysqlclient.so.16.0.0 libmysqlclient.so
+cd /tmp/build
+# Apache php module
+cp /tmp/build/php-5.4.11/libs/libphp5.so /app/apache/modules/
+
+# APC
+apt-get install autoconf
+curl http://pecl.php.net/get/APC/3.1.14 | tar xzf -
+cd APC-3.1.14
+/app/php/bin/phpize
+./configure --enable-apc --enable-apc-mmap --with-php-config=/app/php/bin/php-config
+cp .libs/apc.so /app/php/ext
+make && make install
+cd ..
+
+# Create packages
+cd /app
+echo '2.4.3' > apache/VERSION
+tar -zcvf apache.tar.gz apache
+echo '5.4.11' > php/VERSION
+tar -zcvf php.tar.gz php
+
+# Upload to your Amazon S3 s3cmd
+
+# s3cmd apache.tar.gz s3://yourbucket/path/to
+# s3cmd php.tar.gz s3://yourbucket/path/to
+
 
 
 Hacking
