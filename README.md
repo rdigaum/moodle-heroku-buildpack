@@ -71,11 +71,12 @@ Compiling PHP
     apt-get install libbz2-dev
     apt-get install libmcrypt-dev
     apt-get install libcurl4-openssl-dev
+    apt-get install libfreetype6-dev
     apt-get install postgresql-server-dev-8.4
 
     curl -L http://php.net/get/php-5.4.11.tar.gz/from/us1.php.net/mirror | tar xzf -
     cd php-5.4.11
-    ./configure --prefix=/app/php --with-apxs2=/app/apache/bin/apxs --with-mysql --with-pdo-mysql --with-pgsql --with-pdo-pgsql --with-iconv --with-gd --with-curl=/usr/lib --with-config-file-path=/app/php --enable-soap=shared --enable-libxml --enable-simplexml --enable-session --with-xmlrpc --with-openssl --enable-mbstring --with-bz2 --with-zlib
+    ./configure --prefix=/app/php --with-apxs2=/app/apache/bin/apxs --with-mysql --with-pdo-mysql --with-pgsql --with-pdo-pgsql --with-iconv --with-gd --with-curl=/usr/lib --with-config-file-path=/app/php --enable-soap=shared --enable-libxml --enable-simplexml --enable-session --with-xmlrpc --with-openssl --enable-mbstring --with-bz2 --with-zlib --with-gd --with-freetype-dir=/usr/lib --with-jpeg-dir=/usr/lib --with-png-dir=/usr/lib --with-xpm-dir=/usr/lib
     make && make install
     cd ..
 
@@ -99,16 +100,16 @@ APC
     cd APC-3.1.14
     /app/php/bin/phpize
     ./configure --enable-apc --enable-apc-mmap --with-php-config=/app/php/bin/php-config
-    cp .libs/apc.so /app/php/ext
     make && make install
+    cp .libs/apc.so /app/php/ext
     cd ..
 
 Create packages
     cd /app
     echo '2.4.3' > apache/VERSION
-    tar -zcvf apache.tar.gz apache
+    tar -zcvf apache-2.4.3.tar.gz apache
     echo '5.4.11' > php/VERSION
-    tar -zcvf php.tar.gz php
+    tar -zcvf php-5.4.11.tar.gz php
 
 Upload to your Amazon S3 s3cmd
 
