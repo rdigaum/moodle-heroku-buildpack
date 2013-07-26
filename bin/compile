@@ -47,7 +47,7 @@ mkdir -p bin
 ln -s /app/php/bin/php bin/php
 
 # create mahara data folder
-mkdir -p /app/maharadata
+mkdir -p /app/moodledata
 
 cat >>boot.sh <<EOF
 for var in \`env|cut -f1 -d=\`; do
