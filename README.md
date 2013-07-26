@@ -1,4 +1,4 @@
-Apache2.4+PHP5.4 build pack for Mahara
+Apache2.4+PHP5.4 build pack for Moodle
 ========================
 
 This is a build pack bundling PHP and Apache for Heroku apps.
@@ -10,7 +10,7 @@ The config files are bundled with the build pack itself:
 
 * conf/httpd.conf
 * conf/php.ini
-* conf/config.php (Mahara default configuration)
+* conf/config.php (Moodle default configuration)
 
 
 Pre-compiling binaries
@@ -21,9 +21,9 @@ Required software
  - curl
  - ANSI-C compiler
 
-This script will set up a heroku cedar platform (Ubuntu 10.04) for Mahara
+This script will set up a heroku cedar platform (Ubuntu 10.04)
  1. Compile apache 2.4.3 and install on /app/apache
- 2. Compile php 5.4.11 + required extensions and install on /app/php
+ 2. Compile php 5.4.11+ required extensions and install on /app/php
 
     apt-get install curl
     mkdir -p /app
@@ -128,6 +128,4 @@ To change this buildpack, fork it on Github. Push up changes to your fork, then 
 Meta
 ----
 
-Created by Pedro Belo.
-Many thanks to Keith Rarick for the help with assorted Unix topics :)
-Customized by Son Nguyen for Mahara deployment on Heroku
+Froked from https://github.com/grahamjenson/heroku-buildpack-mahara
